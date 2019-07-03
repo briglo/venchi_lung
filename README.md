@@ -14,11 +14,11 @@ so first you want to login to the cluster
 4) setup your R environment `module load briglo/R/3.6.0`
 5) Fire up R `R`
 6) Set up tools you need
-`` library(Seurat)
+``` library(Seurat)
 library(scFuncs) 
 library(reticulate)
 use_python("/share/ClusterShare/software/contrib/briglo/miniconda3/envs/magic/bin/python")
-``
+```
 7) load your seurat object ` load("PATH/TO/SEURAT.rdata")`
 
 ## an R cheatsheet
@@ -33,12 +33,43 @@ pdf('test.pdf',width=36,height=16) #makes a pdf  of set dimensions to plot into,
 ## reading in files
 there are two ways really
 1) manually `genelist=c("TP53","SPOCK2")`
-2) from files (dependent on type) ` read.table("FILENAME", header=T,stringsAsFactors=F) #pretty common, will read a text file saved from an excel doc
+2) from files (dependent on type) ` read.table("FILENAME", header=T,stringsAsFactors=F) #pretty common, will read a text file saved from an excel doc`
 
 ## simple seurat  functions
-* the heatmap `DoHeatmap(seuratObj,group.by="orig.ident",features=YOURGENELIST,disp.max=200)
-* The violin plot `VlnPlot(seuratObj,split.by="orig.ident",group.by="orig_final.ident",features=YOURGENELIST,pt.size=.1)
-* the dot plot `DotPlot(seuratObj,features=YOURGENELIST,group.by="orig_final.ident",do.return=T) + theme(axis.text.x = element_text(angle = 90))`
+* the heatmap `DoHeatmap(seuratObj,group.by="orig.ident",features=YOURGENE(S),disp.max=200)`
+* The violin plot `VlnPlot(seuratObj,split.by="orig.ident",group.by="orig_final.ident",features=YOURGENE(S),pt.size=.1)`
+* the dot plot `DotPlot(seuratObj,features=YOURGENE(S),group.by="orig_final.ident",do.return=T) + theme(axis.text.x = element_text(angle = 90))`
 * the UMAP plot `UMAPPlot(seuratObj,group.by='orig_final.ident',label=T)`
+* add a meta score `seuratObj<-AddModuleScore(seuratObj,features = YOURGENELIST, name="my_meta_score")`
+* plot expression of something in UMAP space `FeaturePlot(seuratObj,reduction="umap",features=YOURGENE(S),split.by=NULL))
+
+## some of the "bespoke functions"
+* CellPhoneDB e.g.
+```
+ti<-subsetSeurat2cellPhone(seuratObj=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
+     
+     #on cluster
+     module load briglo/miniconda/3
+     source activate cellphone
+     qsub -V -cwd -b y -j y -pe smp 8 -N cpdb_1 "cellphonedb method statistical_analysis small_meta.txt small_counts.txt --project-name small --threshold 10 --threads 8"
+     EASY!!!
+
+#back in R
+cd("PATH/TO/CELLPHONEDB/OUT/small")
+cellphoneDB_data<-preprocCellphone(varval=0,pval=.05)
+
+intgraph(cellphoneDB_data$countdat, scoreCut = 0.3, numberCut = 0, numberSplit = 35)
+```
 
 
+* Reactome Analysis e.g.
+```
+markers<-makeReactomePipe(integrated,"SCT_snn_res.0.8")
+for (i in 1:length(markers$CP_result)) dotplot(markers$CP_result[[i]]) + ggtitle(names(markers$CP_result)[i])
+```
+
+
+* Count number of cells expressing above a cutoff  subset by grouping data
+```
+countTab<-countByCut(seuratObj=integrated,geneName="PFN1",expCut=2,groupBy="orig_final.ident",splitBy="orig.ident")
+```
