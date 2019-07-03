@@ -1,7 +1,7 @@
 # venessa's worflow
 A workflow for venessa chin
 
-** This should look like a hack version of those fancy seurat tutorials that i told you to look at 
+*This should look like a hack version of those fancy seurat tutorials that i told you to look at*
 
 so first you want to login to the cluster
 
