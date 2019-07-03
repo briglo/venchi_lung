@@ -41,7 +41,7 @@ there are two ways really
 * the dot plot `DotPlot(seuratObj,features=YOURGENE(S),group.by="orig_final.ident",do.return=T) + theme(axis.text.x = element_text(angle = 90))`
 * the UMAP plot `UMAPPlot(seuratObj,group.by='orig_final.ident',label=T)`
 * add a meta score `seuratObj<-AddModuleScore(seuratObj,features = YOURGENELIST, name="my_meta_score")`
-* plot expression of something in UMAP space `FeaturePlot(seuratObj,reduction="umap",features=YOURGENE(S),split.by=NULL))
+* plot expression of something in UMAP space `FeaturePlot(seuratObj,reduction="umap",features=YOURGENE(S),split.by=NULL))`
 
 ## some of the "bespoke functions"
 * CellPhoneDB e.g.
