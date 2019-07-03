@@ -17,28 +17,28 @@ install(c("Seurat","dplyr","biomaRt","ggplot2","clusterProfiler","ReactomePA","i
 ```R
 setwd("NEW/PATH") #move to a new directory
 ls() # gives a list of all objects currently loaded (in case you forgot what name it was)
-head(seuratObj@meta.data) # shows the metadata columns of the seurat bject you can group by
+head(integrated@meta.data) # shows the metadata columns of the seurat bject you can group by
 pdf('test.pdf',width=36,height=16) #makes a pdf  of set dimensions to plot into, good if hard to see...
 
 ```
 
 ## reading in files
 there are two ways really
-1) manually `genelist=c("TP53","SPOCK2")`
+1) manually `genelist=c("GZMA","GZMB","GZMH","GZMK","GZMM","PFN1","FASL","TNFSF10")`
 2) from files (dependent on type) ` read.table("FILENAME", header=T,stringsAsFactors=F) #pretty common, will read a text file saved from an excel doc`
 
 ## simple seurat  functions
-* the heatmap `DoHeatmap(seuratObj,group.by="orig.ident",features=YOURGENE(S),disp.max=200)`
-* The violin plot `VlnPlot(seuratObj,split.by="orig.ident",group.by="orig_final.ident",features=YOURGENE(S),pt.size=.1)`
-* the dot plot `DotPlot(seuratObj,features=YOURGENE(S),group.by="orig_final.ident",do.return=T) + theme(axis.text.x = element_text(angle = 90))`
-* the UMAP plot `UMAPPlot(seuratObj,group.by='orig_final.ident',label=T)`
-* add a meta score `seuratObj<-AddModuleScore(seuratObj,features = YOURGENELIST, name="my_meta_score")`
-* plot expression of something in UMAP space `FeaturePlot(seuratObj,reduction="umap",features=YOURGENE(S),split.by=NULL))`
+* the heatmap `DoHeatmap(integrated,group.by="final_orig.ident",features=genelist,disp.max=200)`
+* The violin plot `VlnPlot(integrated,split.by="orig.ident",group.by="orig_final.ident",features=genelist,pt.size=.1)`
+* the dot plot `DotPlot(integrated,features=genelist,group.by="orig_final.ident",do.return=T) + theme(axis.text.x = element_text(angle = 90))`
+* the UMAP plot `UMAPPlot(integrated,group.by='orig_final.ident',label=T)`
+* add a meta score `integrated<-AddModuleScore(integrated,features = YOURGENELIST, name="my_meta_score")`
+* plot expression of something in UMAP space `FeaturePlot(integrated,reduction="umap",features=genelist,split.by=NULL))`
 
 ## some of the "bespoke functions"
 * CellPhoneDB e.g.
 ```R
-ti<-subsetSeurat2cellPhone(seuratObj=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
+ti<-subsetSeurat2cellPhone(integrated=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
 ```
 ```bash 
      #on cluster
@@ -64,16 +64,17 @@ for (i in 1:length(markers$CP_result)) dotplot(markers$CP_result[[i]]) + ggtitle
 
 * Count number of cells expressing above a cutoff  subset by grouping data
 ```
-countTab<-countByCut(seuratObj=integrated,geneName="PFN1",expCut=2,groupBy="orig_final.ident",splitBy="orig.ident")
+countTab<-countByCut(integrated=integrated,geneName="PFN1",expCut=2,groupBy="orig_final.ident",splitBy="orig.ident")
 ```
 
-
-## for later
+# setting up: for later
+## getting onto the cluster
 so first you want to login to the cluster
 
 [this website](https://intranet.gimr.garvan.org.au/display/PG/Wolfpack+SGE+Cheat+Sheet) is where our group put stuff to get on the cluster
-## getting started
 
+
+## getting started
 1) once you are done, login
 2) make an interactive HPC job `qrsh -pe smp 4 -l mem_requested=20G`
 3) navigate to the results folder you need `cd /share/ScratchGeneral/PATH`
