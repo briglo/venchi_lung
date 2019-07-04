@@ -4,48 +4,55 @@ A workflow for venessa chin
 *This should look like a hack version of those fancy seurat tutorials that i told you to look at*
 
 ## bits and bobs
+* terminal is your friend 
+* we need to make sure you are running a "current" version of R `R --version`
 * youll need to make a RStudio project somewhere on your laptop
 * you'll need to get the r object pandora/volumes/Cancer/brian\ gloss/190531_integrated.rdata and put it in your project path
 * we'll need to install a bunch of R libraries, plus maybe some others that ive forgotten
 ```R
 install.packages("BiocManager")
 library(BiocManager)
-install(c("Seurat","dplyr","biomaRt","ggplot2","clusterProfiler","ReactomePA","igraph","cowplot"))
+install(c("devtools","Seurat","dplyr","biomaRt","ggplot2","clusterProfiler","ReactomePA","igraph","cowplot"))
+devtools::install_github("https://github.com/briglo/venchi_lung.git")
 ```
 
 ## an R cheatsheet
 ```R
+library(Seurat) #loads the library Seurat, required for basically everything
+library(venchi) #loads the functions i wrote for you
 setwd("NEW/PATH") #move to a new directory
 ls() # gives a list of all objects currently loaded (in case you forgot what name it was)
+load("PATH/TO/SEURAT.rdata") #loads the seurat object, takes a while
 head(integrated@meta.data) # shows the metadata columns of the seurat bject you can group by
+#this will be useful when you're playing in the cluster
 pdf('test.pdf',width=36,height=16) #makes a pdf  of set dimensions to plot into, good if hard to see...
-
+dev.off() #stops whatever graphics device R is plotting to, necessary to view pdfs
 ```
 
 ## reading in files
 there are two ways really
-1) manually `genelist=c("GZMA","GZMB","GZMH","GZMK","GZMM","PFN1","FASL","TNFSF10")`
+1) manually `genelist=c("GZMA","GZMB","GZMH","GZMK","GZMM","PFN1","FASLG","TNFSF10")`
 2) from files (dependent on type) ` read.table("FILENAME", header=T,stringsAsFactors=F) #pretty common, will read a text file saved from an excel doc`
 
 ## simple seurat  functions
-* the heatmap `DoHeatmap(integrated,group.by="final_orig.ident",features=genelist,disp.max=200)`
+* the heatmap `DoHeatmap(integrated,group.by="orig_final.ident",features=genelist,disp.max=200)`
 * The violin plot `VlnPlot(integrated,split.by="orig.ident",group.by="orig_final.ident",features=genelist,pt.size=.1)`
 * the dot plot `DotPlot(integrated,features=genelist,group.by="orig_final.ident",do.return=T) + theme(axis.text.x = element_text(angle = 90))`
 * the UMAP plot `UMAPPlot(integrated,group.by='orig_final.ident',label=T)`
-* add a meta score `integrated<-AddModuleScore(integrated,features = YOURGENELIST, name="my_meta_score")`
-* plot expression of something in UMAP space `FeaturePlot(integrated,reduction="umap",features=genelist,split.by=NULL))`
+* add a meta score `integrated<-AddModuleScore(integrated,features = genelist, name="my_meta_score")`
+* plot expression of something in UMAP space `FeaturePlot(integrated,reduction="umap",features=genelist,split.by=NULL))` or `FeaturePlot(integrated,reduction="umap",features='my_meta_score',split_by="orig_final.ident"`
 
 ## some of the "bespoke functions"
 * CellPhoneDB e.g.
 ```R
-ti<-subsetSeurat2cellPhone(integrated=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
+ti<-subsetSeurat2cellPhone(seuratObj=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
 ```
 ```bash 
-     #on cluster
-     module load briglo/miniconda/3
-     source activate cellphone
-     qsub -V -cwd -b y -j y -pe smp 8 -N cpdb_1 "cellphonedb method statistical_analysis small_meta.txt small_counts.txt --project-name small --threshold 10 --threads 8"
-     EASY!!!
+#running cellphoneDB
+module load briglo/miniconda/3
+source activate cellphone
+qsub -V -cwd -b y -j y -pe smp 8 -N cpdb_1 "cellphonedb method statistical_analysis small_meta.txt small_counts.txt --project-name small --threshold 10 --threads 8"
+#EASY!!!
 ```
 ```R
 #back in R
