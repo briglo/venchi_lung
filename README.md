@@ -3,17 +3,14 @@ A workflow for venessa chin
 
 *This should look like a hack version of those fancy seurat tutorials that i told you to look at*
 
-## bits and bobs
-* terminal is your friend 
-* we need to make sure you are running a "current" version of R `R --version`
-* youll need to make a RStudio project somewhere on your laptop
-* you'll need to get the r object pandora/volumes/Cancer/brian\ gloss/190531_integrated.rdata and put it in your project path
-* we'll need to install a bunch of R libraries, plus maybe some others that ive forgotten
-```R
-install.packages("BiocManager")
-library(BiocManager)
-install(c("devtools","Seurat","dplyr","biomaRt","ggplot2","clusterProfiler","ReactomePA","igraph","cowplot"))
-devtools::install_github("https://github.com/briglo/venchi_lung.git")
+## getting onto the cluster and firing up R
+```bash
+cluster # mounts cluster
+d1 # connect to dice
+brain # get an interactive compute session
+scr # currently goes to /share/ScratchGeneral/briglo/scRNA
+cd venchi
+R
 ```
 
 ## an R cheatsheet
@@ -43,24 +40,6 @@ there are two ways really
 * plot expression of something in UMAP space `FeaturePlot(integrated,reduction="umap",features=genelist,split.by=NULL))` or `FeaturePlot(integrated,reduction="umap",features='my_meta_score',split_by="orig_final.ident"`
 
 ## some of the "bespoke functions"
-* CellPhoneDB e.g.
-```R
-ti<-subsetSeurat2cellPhone(seuratObj=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
-```
-```bash 
-#running cellphoneDB
-module load briglo/miniconda/3
-source activate cellphone
-qsub -V -cwd -b y -j y -pe smp 8 -N cpdb_1 "cellphonedb method statistical_analysis small_meta.txt small_counts.txt --project-name small --threshold 10 --threads 8"
-#EASY!!!
-```
-```R
-#back in R
-cd("PATH/TO/CELLPHONEDB/OUT/small")
-cellphoneDB_data<-preprocCellphone(varval=0,pval=.05)
-intgraph(cellphoneDB_data$countdat, scoreCut = 0.3, numberCut = 0, numberSplit = 35)
-```
-
 
 * The kinds of comparisons we were talking about counting
 ```R
@@ -91,6 +70,42 @@ x<-lapply(pathways,dotplot)
 cowplot::plot_grid(x)
 
 ```
+
+
+
+## bits and bobs
+* terminal is your friend 
+* we need to make sure you are running a "current" version of R `R --version`
+* youll need to make a RStudio project somewhere on your laptop
+* you'll need to get the r object pandora/volumes/Cancer/brian\ gloss/190531_integrated.rdata and put it in your project path
+* we'll need to install a bunch of R libraries, plus maybe some others that ive forgotten
+```R
+install.packages("BiocManager")
+library(BiocManager)
+install(c("devtools","Seurat","dplyr","biomaRt","ggplot2","clusterProfiler","ReactomePA","igraph","cowplot"))
+devtools::install_github("https://github.com/briglo/venchi_lung.git")
+```
+
+
+* CellPhoneDB e.g.
+```R
+ti<-subsetSeurat2cellPhone(seuratObj=integrated,annoColumn="SCT_snn_res.0.15",no.cells=50,prefix="small")
+```
+```bash 
+#running cellphoneDB
+module load briglo/miniconda/3
+source activate cellphone
+qsub -V -cwd -b y -j y -pe smp 8 -N cpdb_1 "cellphonedb method statistical_analysis small_meta.txt small_counts.txt --project-name small --threshold 10 --threads 8"
+#EASY!!!
+```
+```R
+#back in R
+cd("PATH/TO/CELLPHONEDB/OUT/small")
+cellphoneDB_data<-preprocCellphone(varval=0,pval=.05)
+intgraph(cellphoneDB_data$countdat, scoreCut = 0.3, numberCut = 0, numberSplit = 35)
+```
+
+
 
 
 # setting up: for later
