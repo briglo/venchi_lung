@@ -110,7 +110,7 @@ intgraph(cellphoneDB_data$countdat, scoreCut = 0.3, numberCut = 0, numberSplit =
 
 # setting up: for later
 ## getting onto the cluster
-so first you want to login to the cluster
+so first you want to login to the cluster this was originally done by doing [this really](https://intranet.gimr.garvan.org.au/display/PG/A+guide+for+getting+a+mac+onto+the+cluster)
 
 [this website](https://intranet.gimr.garvan.org.au/display/PG/Wolfpack+SGE+Cheat+Sheet) is where our group put stuff to get on the cluster
 
