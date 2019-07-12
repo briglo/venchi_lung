@@ -62,17 +62,36 @@ intgraph(cellphoneDB_data$countdat, scoreCut = 0.3, numberCut = 0, numberSplit =
 ```
 
 
-* Reactome Analysis e.g.
+* The kinds of comparisons we were talking about counting
+```R
+#for a simple single gene, single cutoff in all cells
+countTab<-countByCut(integrated=integrated,geneName="PFN1",expCut=2,groupBy="orig_final.ident",splitBy="orig.ident")
+
+#for a more complicated mulltigene, multi cutoffs
+tab<-data.frame(gene=c("PFN1","GZMA","GZMB"),cuts=c(2,0,0))
+#adds new meta.data columns containing info of interest, can be used like below in Reactome Analysis
+integrated<-annotateByCuts(seuratObj=integrated,geneTab=tab,groupBy="orig_final.ident",groupID="CD8",splitBy="orig.ident")
+
+outTab #a table of counts for cells matching groupID FYE
 ```
+
+
+* Reactome Analysis e.g.
+```R
+#for all groupings made by a particular metadata column
 markers<-makeReactomePipe(integrated,"SCT_snn_res.0.8")
 for (i in 1:length(markers$CP_result)) dotplot(markers$CP_result[[i]]) + ggtitle(names(markers$CP_result)[i])
+
+#for combining two metadata columns and directly comparing two groups(split by experiment)
+#first extract the relevant markers and universe
+enrichment<-makeSpecificMarkers(integrated,groupBy_1="orig_final.ident",groupID_1="Cancer_2",groupBy_2="PFN1_GZMA_GZMB",groupID_2=c("hi_low_low","low_low_low"),splitBy="orig.ident",splitID=NULL)
+#then test for enrichment
+pathways<-lapply(enrichment$markerLists, function(X) makeReactomeForMarkers(X,enrichment$hasEntrez))
+x<-lapply(pathways,dotplot)
+cowplot::plot_grid(x)
+
 ```
 
-
-* Count number of cells expressing above a cutoff  subset by grouping data
-```
-countTab<-countByCut(integrated=integrated,geneName="PFN1",expCut=2,groupBy="orig_final.ident",splitBy="orig.ident")
-```
 
 # setting up: for later
 ## getting onto the cluster
