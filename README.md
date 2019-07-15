@@ -61,13 +61,11 @@ outTab #a table of counts for cells matching groupID FYE
 markers<-makeReactomePipe(integrated,"SCT_snn_res.0.8")
 for (i in 1:length(markers$CP_result)) dotplot(markers$CP_result[[i]]) + ggtitle(names(markers$CP_result)[i])
 
-#for combining two metadata columns and directly comparing two groups(split by experiment)
+#for combining two metadata columns and directly comparing two groups(split by something else if you want)
 #first extract the relevant markers and universe
-enrichment<-makeSpecificMarkers(integrated,groupBy_1="orig_final.ident",groupID_1="Cancer_2",groupBy_2="PFN1_GZMA_GZMB",groupID_2=c("hi_low_low","low_low_low"),splitBy="orig.ident",splitID=NULL)
-#then test for enrichment
-pathways<-lapply(enrichment$markerLists, function(X) makeReactomeForMarkers(X,enrichment$hasEntrez))
-x<-lapply(pathways,dotplot)
-cowplot::plot_grid(x)
+enrichment<-makeSpecificMarkers(integrated,groupBy_1="orig_final.ident",groupID_1="CD8 T-cell 1",groupBy_2="orig.ident",groupID_2=c("ACITE","BCITE"),splitBy=NULL,splitID=NULL)
+out<-makeReactomeForMarkers(enrichment$markerLists,enrichment$hasEntrez)
+dotoplot(out)
 
 ```
 
